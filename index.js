@@ -22,7 +22,7 @@ async function run() {
     const database = client.db("traveller");
 
     const blogsCollection = database.collection("blogs");
-    const ordersCollection = database.collection("orders");
+    const experienceCollection = database.collection("experience");
     const reviewCollection = database.collection("reviews");
     const usersCollection = database.collection("users");
 
@@ -40,27 +40,47 @@ async function run() {
       res.send(blogs);
     });
 
-    ///load single bikes
+    ///load single blog
     app.get("/singleBlog/:id", async (req, res) => {
       const id = req.params.id;
       const blog = await blogsCollection.findOne({ _id: ObjectId(id) });
       res.send(blog);
     });
 
-    ///add order
-    app.post("/orders", async (req, res) => {
-      const newOrder = req.body;
+    ///load specific tour spot experience
+    app.get("/specificExperience", async (req, res) => {
+      const title = req.query.title;
+      const specificExperience = await experienceCollection
+        .find({ title })
+        .toArray();
 
-      const result = await ordersCollection.insertOne(newOrder);
+      res.send(specificExperience);
+    });
+
+    ///add  experience
+    app.post("/userExperience", async (req, res) => {
+      const experience = req.body;
+
+      const result = await experienceCollection.insertOne(experience);
       res.json(result);
     });
 
-    ///load specific user Orders
-    app.get("/myOrders", async (req, res) => {
+    ///load specific user experience
+    app.get("/myExperience", async (req, res) => {
       const email = req.query.email;
 
-      const myOrders = await ordersCollection.find({ email: email }).toArray();
-      res.send(myOrders);
+      const myExperience = await experienceCollection
+        .find({ email: email })
+        .toArray();
+      res.send(myExperience);
+    });
+
+    ///load specific user Blog
+    app.get("/myBlog", async (req, res) => {
+      const email = req.query.email;
+
+      const myBlog = await blogsCollection.find({ email: email }).toArray();
+      res.send(myBlog);
     });
 
     ///review post
@@ -76,10 +96,10 @@ async function run() {
       res.send(reviews);
     });
 
-    ///load all orders
-    app.get("/allOrders", async (req, res) => {
-      const allOrders = await ordersCollection.find({}).toArray();
-      res.send(allOrders);
+    ///load all experience
+    app.get("/allExperience", async (req, res) => {
+      const allExperience = await experienceCollection.find({}).toArray();
+      res.send(allExperience);
     });
 
     ///update status
@@ -92,16 +112,16 @@ async function run() {
       const updateDoc = {
         $set: { status: status },
       };
-      const result = await ordersCollection.updateOne(filter, updateDoc);
+      const result = await experienceCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
 
-    ///delete order
-    app.delete("/deleteOrder/:id", async (req, res) => {
+    ///delete Experience
+    app.delete("/deleteExperience/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
-      const orderDelete = await ordersCollection.deleteOne(query);
-      res.send(orderDelete);
+      const deleteExperience = await experienceCollection.deleteOne(query);
+      res.send(deleteExperience);
     });
 
     ///load all bike
@@ -110,7 +130,7 @@ async function run() {
       res.send(allOrders);
     });
 
-    ///delete bike
+    ///delete blog
     app.delete("/deleteBlog/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -120,30 +140,33 @@ async function run() {
 
     ///user create
     app.post("/users", async (req, res) => {
-      const user = req.body;
-      const result = await usersCollection.insertOne(user);
+      const newUser = req.body;
+      const result = await usersCollection.insertOne(newUser);
       res.json(result);
     });
+
     ///make admin
     app.put("/makeAdmin", async (req, res) => {
       const email = req.body.email;
       const filter = { email };
       const updateDoc = {
         $set: {
-          role: "admin",
+          role: "Admin",
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
+      console.log(result);
     });
 
     ///check admin
     app.get("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
       const filter = { email };
+      console.log(email);
       const user = await usersCollection.findOne(filter);
       let isAdmin = false;
-      if (user?.role === "admin") {
+      if (user?.role === "Admin") {
         isAdmin = true;
       }
       res.send({ admin: isAdmin });
