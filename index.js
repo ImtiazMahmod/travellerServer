@@ -47,6 +47,20 @@ async function run() {
       res.send(blog);
     });
 
+    ///update blog
+    app.put("/singleBlog/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body.data;
+      const filter = { _id: ObjectId(id) };
+
+      const updateDoc = {
+        $set: { data: data },
+      };
+      const result = await experienceCollection.updateOne(filter, updateDoc);
+      res.json(result);
+      console.log(result);
+    });
+
     ///load specific tour spot experience
     app.get("/specificExperience", async (req, res) => {
       const title = req.query.title;
@@ -103,10 +117,9 @@ async function run() {
     });
 
     ///update status
-    app.put("/orders/", async (req, res) => {
+    app.put("/experience/", async (req, res) => {
       const id = req.query.id;
       const status = req.query.status;
-
       const filter = { _id: ObjectId(id) };
 
       const updateDoc = {
@@ -124,12 +137,6 @@ async function run() {
       res.send(deleteExperience);
     });
 
-    ///load all bike
-    app.get("/bikes", async (req, res) => {
-      const allOrders = await blogsCollection.find({}).toArray();
-      res.send(allOrders);
-    });
-
     ///delete blog
     app.delete("/deleteBlog/:id", async (req, res) => {
       const id = req.params.id;
@@ -141,6 +148,7 @@ async function run() {
     ///user create
     app.post("/users", async (req, res) => {
       const newUser = req.body;
+      console.log(newUser);
       const result = await usersCollection.insertOne(newUser);
       res.json(result);
     });
